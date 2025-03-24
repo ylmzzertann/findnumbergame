@@ -1,6 +1,7 @@
 import java.util.Random;
 
 public class Main {
+    
     public static void main(String[] args) {
         Random random = new Random();
         int[] numbers = new int[6];
@@ -24,5 +25,22 @@ public class Main {
         }
         
         System.out.println("\nHedeflenen 3 basamaklı sayı: " + targetNumber);
+
+        int countdown = 5;
+        
+        while (countdown > 0) {
+            System.out.println("Kalan süre: " + countdown + " saniye");
+            
+            try {
+                Thread.sleep(1000); // 1 saniye bekle
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            
+            countdown--;
+        }
+        
+        System.out.println("Süre bitti! Program kapanıyor...");
+        System.exit(0);
     }
 }
