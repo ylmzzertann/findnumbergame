@@ -1,8 +1,18 @@
 import java.util.Random;
+import java.util.Scanner;
 
 public class Main {
     
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        // Kullanıcıdan ad ve soyad alma
+        System.out.print("Adınızı girin: ");
+        String firstName = scanner.nextLine();
+        
+        
+        System.out.println("Merhaba, " + firstName + " " + "! Oyun başlıyor...\n");
+
         Random random = new Random();
         int[] numbers = new int[6];
         
