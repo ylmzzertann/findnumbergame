@@ -2,7 +2,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Main {
+public class RandomNumberGame {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         
@@ -14,6 +14,26 @@ public class Main {
         String lastName = scanner.nextLine();
         
         System.out.println("Merhaba, " + firstName + " " + lastName + "! Oyun başlıyor...\n");
+        
+        // Seviye seçimi
+        System.out.println("Zorluk seviyesini seçin: 1 - Kolay (90 sn), 2 - Orta (60 sn), 3 - Zor (30 sn)");
+        int level = scanner.nextInt();
+        int countdown;
+        
+        switch (level) {
+            case 1:
+                countdown = 90;
+                break;
+            case 2:
+                countdown = 60;
+                break;
+            case 3:
+                countdown = 30;
+                break;
+            default:
+                System.out.println("Geçersiz seçim! Varsayılan olarak Orta seviye seçildi (60 sn)");
+                countdown = 60;
+        }
         
         Random random = new Random();
         int[] numbers = new int[6];
@@ -39,7 +59,6 @@ public class Main {
         System.out.println("\nHedeflenen 3 basamaklı sayı: " + targetNumber);
         
         // Geri sayım başlat
-        int countdown = 60;
         AtomicInteger userGuess = new AtomicInteger(-1);
         
         System.out.println("Lütfen süre dolmadan hedef sayıyı tahmin edin!");
@@ -53,16 +72,14 @@ public class Main {
         
         inputThread.start();
         
-        while (countdown > 0) {
-            System.out.println("Kalan süre: " + countdown + " saniye");
+        for (int i = countdown; i > 0; i--) {
+            System.out.println("Geri sayım: " + i + " saniye kaldı...");
             
             try {
                 Thread.sleep(1000); // 1 saniye bekle
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            
-            countdown--;
             
             if (!inputThread.isAlive()) {
                 break;
