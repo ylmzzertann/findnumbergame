@@ -60,20 +60,31 @@ public class RandomNumberGame {
         
         // Geri sayım başlat
         AtomicInteger userGuess = new AtomicInteger(-1);
-        
-        System.out.println("Lütfen süre dolmadan hedef sayıyı tahmin edin!");
+        AtomicInteger guessCount = new AtomicInteger(0);
+        boolean[] correctGuess = {false};
+
+        System.out.println("Lütfen süre dolmadan hedef sayıyı tahmin edin! Çoklu tahmin hakkınız var.");
         
         Thread inputThread = new Thread(() -> {
-            System.out.print("Tahmininizi girin: ");
-            if (scanner.hasNextInt()) {
-                userGuess.set(scanner.nextInt());
+            while (true) {
+                System.out.print("Tahmininizi girin: ");
+                if (scanner.hasNextInt()) {
+                    userGuess.set(scanner.nextInt());
+                    guessCount.incrementAndGet();
+                    
+                    if (userGuess.get() == targetNumber) {
+                        correctGuess[0] = true;
+                        break;
+                    }
+                }
             }
         });
         
         inputThread.start();
         
+        System.out.print("Geri sayım: [");
         for (int i = countdown; i > 0; i--) {
-            System.out.println("Geri sayım: " + i + " saniye kaldı...");
+            System.out.print("*");
             
             try {
                 Thread.sleep(1000); // 1 saniye bekle
@@ -81,13 +92,14 @@ public class RandomNumberGame {
                 e.printStackTrace();
             }
             
-            if (!inputThread.isAlive()) {
+            if (correctGuess[0] || !inputThread.isAlive()) {
                 break;
             }
         }
+        System.out.println("]");
         
-        if (userGuess.get() == targetNumber) {
-            System.out.println("Tebrikler! Doğru tahmin ettiniz: " + userGuess.get());
+        if (correctGuess[0]) {
+            System.out.println("Tebrikler! Doğru tahmin ettiniz: " + userGuess.get() + " (" + guessCount.get() + " deneme yaptınız)");
         } else {
             System.out.println("Süre doldu veya yanlış tahmin! Doğru sayı: " + targetNumber);
         }
