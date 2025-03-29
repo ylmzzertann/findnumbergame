@@ -1,5 +1,6 @@
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RandomNumberGame {
@@ -61,15 +62,23 @@ public class RandomNumberGame {
         // Geri sayım başlat
         AtomicInteger userGuess = new AtomicInteger(-1);
         AtomicInteger guessCount = new AtomicInteger(0);
+        AtomicBoolean stopRequested = new AtomicBoolean(false);
         boolean[] correctGuess = {false};
+        boolean[] countdownStopped = {false};
 
-        System.out.println("Lütfen süre dolmadan hedef sayıyı tahmin edin! Çoklu tahmin hakkınız var.");
+        System.out.println("Lütfen süre dolmadan hedef sayıyı tahmin edin! Çoklu tahmin hakkınız var. Süreyi durdurmak için '0' yazın.");
         
         Thread inputThread = new Thread(() -> {
             while (true) {
                 System.out.print("Tahmininizi girin: ");
                 if (scanner.hasNextInt()) {
-                    userGuess.set(scanner.nextInt());
+                    int input = scanner.nextInt();
+                    if (input == 0) {
+                        stopRequested.set(true);
+                        countdownStopped[0] = true;
+                        break;
+                    }
+                    userGuess.set(input);
                     guessCount.incrementAndGet();
                     
                     if (userGuess.get() == targetNumber) {
@@ -84,6 +93,9 @@ public class RandomNumberGame {
         
         System.out.print("Geri sayım: [");
         for (int i = countdown; i > 0; i--) {
+            if (countdownStopped[0]) {
+                break;
+            }
             System.out.print("*");
             
             try {
@@ -98,7 +110,15 @@ public class RandomNumberGame {
         }
         System.out.println("]");
         
-        if (correctGuess[0]) {
+        if (stopRequested.get()) {
+            System.out.println("Süre kullanıcı tarafından durduruldu! Şimdi tahmininizi girin:");
+            int finalGuess = scanner.nextInt();
+            if (finalGuess == targetNumber) {
+                System.out.println("Tebrikler! Doğru tahmin ettiniz: " + finalGuess);
+            } else {
+                System.out.println("Yanlış tahmin! Doğru sayı: " + targetNumber);
+            }
+        } else if (correctGuess[0]) {
             System.out.println("Tebrikler! Doğru tahmin ettiniz: " + userGuess.get() + " (" + guessCount.get() + " deneme yaptınız)");
         } else {
             System.out.println("Süre doldu veya yanlış tahmin! Doğru sayı: " + targetNumber);
