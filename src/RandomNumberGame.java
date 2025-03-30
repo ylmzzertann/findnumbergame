@@ -65,6 +65,7 @@ public class RandomNumberGame {
         AtomicBoolean stopRequested = new AtomicBoolean(false);
         boolean[] correctGuess = {false};
         boolean[] countdownStopped = {false};
+        long startTime = System.currentTimeMillis();
 
         System.out.println("Lütfen süre dolmadan hedef sayıyı tahmin edin! Çoklu tahmin hakkınız var. Süreyi durdurmak için '0' yazın.");
         
@@ -110,16 +111,34 @@ public class RandomNumberGame {
         }
         System.out.println("]");
         
+        long endTime = System.currentTimeMillis();
+        int elapsedSeconds = (int) ((endTime - startTime) / 1000);
+        int score = 0;
+
         if (stopRequested.get()) {
             System.out.println("Süre kullanıcı tarafından durduruldu! Şimdi tahmininizi girin:");
             int finalGuess = scanner.nextInt();
             if (finalGuess == targetNumber) {
-                System.out.println("Tebrikler! Doğru tahmin ettiniz: " + finalGuess);
+                if (elapsedSeconds <= 15) {
+                    score = 10;
+                } else if (elapsedSeconds <= 30) {
+                    score = 7;
+                } else {
+                    score = 5;
+                }
+                System.out.println("Tebrikler! Doğru tahmin ettiniz: " + finalGuess + " Puanınız: " + score);
             } else {
                 System.out.println("Yanlış tahmin! Doğru sayı: " + targetNumber);
             }
         } else if (correctGuess[0]) {
-            System.out.println("Tebrikler! Doğru tahmin ettiniz: " + userGuess.get() + " (" + guessCount.get() + " deneme yaptınız)");
+            if (elapsedSeconds <= 15) {
+                score = 10;
+            } else if (elapsedSeconds <= 30) {
+                score = 7;
+            } else {
+                score = 5;
+            }
+            System.out.println("Tebrikler! Doğru tahmin ettiniz: " + userGuess.get() + " (" + guessCount.get() + " deneme yaptınız) Puanınız: " + score);
         } else {
             System.out.println("Süre doldu veya yanlış tahmin! Doğru sayı: " + targetNumber);
         }
