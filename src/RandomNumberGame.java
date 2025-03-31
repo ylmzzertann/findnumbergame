@@ -114,23 +114,15 @@ public class RandomNumberGame {
         long endTime = System.currentTimeMillis();
         int elapsedSeconds = (int) ((endTime - startTime) / 1000);
         int score = 0;
-
+        int finalGuess = userGuess.get();
+        
         if (stopRequested.get()) {
             System.out.println("Süre kullanıcı tarafından durduruldu! Şimdi tahmininizi girin:");
-            int finalGuess = scanner.nextInt();
-            if (finalGuess == targetNumber) {
-                if (elapsedSeconds <= 15) {
-                    score = 10;
-                } else if (elapsedSeconds <= 30) {
-                    score = 7;
-                } else {
-                    score = 5;
-                }
-                System.out.println("Tebrikler! Doğru tahmin ettiniz: " + finalGuess + " Puanınız: " + score);
-            } else {
-                System.out.println("Yanlış tahmin! Doğru sayı: " + targetNumber);
-            }
-        } else if (correctGuess[0]) {
+            finalGuess = scanner.nextInt();
+        }
+        
+        int diff = Math.abs(finalGuess - targetNumber);
+        if (finalGuess == targetNumber) {
             if (elapsedSeconds <= 15) {
                 score = 10;
             } else if (elapsedSeconds <= 30) {
@@ -138,11 +130,15 @@ public class RandomNumberGame {
             } else {
                 score = 5;
             }
-            System.out.println("Tebrikler! Doğru tahmin ettiniz: " + userGuess.get() + " (" + guessCount.get() + " deneme yaptınız) Puanınız: " + score);
         } else {
-            System.out.println("Süre doldu veya yanlış tahmin! Doğru sayı: " + targetNumber);
+            if (diff == 1) score = 3;
+            else if (diff == 2) score = 2;
+            else if (diff == 3) score = 1;
         }
         
+        System.out.println("Tahmininiz: " + finalGuess + " | Hedef: " + targetNumber);
+        System.out.println("Puanınız: " + score);
+        System.out.println("Tahmininiz hedef sayıya " + diff + " kadar uzaklıkta.");
         System.out.println("Oyun sona erdi. Program kapanıyor...");
         System.exit(0);
     }
