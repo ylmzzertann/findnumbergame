@@ -41,6 +41,8 @@ class Timer {
             }
         }
         System.out.println("\nSüre doldu!");
+        System.out.println("0 Puan kazandınız. Oyun sona erdi.");
+        System.exit(0);
     }
 }
 
