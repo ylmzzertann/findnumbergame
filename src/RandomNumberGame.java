@@ -41,8 +41,6 @@ class Timer {
             }
         }
         System.out.println("\nSüre doldu!");
-        System.out.println("0 Puan kazandınız. Oyun sona erdi.");
-        System.exit(0);
     }
 }
 
@@ -82,7 +80,8 @@ public class RandomNumberGame {
 
         boolean playAgain;
         int totalScore = 0;
-        
+        int correctAnswers = 0;
+
         do {
             System.out.println("Zorluk seviyesini seçin: 1 - Kolay (90 sn), 2 - Orta (60 sn), 3 - Zor (30 sn)");
             int level = scanner.nextInt();
@@ -115,20 +114,21 @@ public class RandomNumberGame {
             long startTime = System.currentTimeMillis();
             int userGuess = inputHandler.getUserGuess(scanner, stopRequested);
             long endTime = System.currentTimeMillis();
-            
+
             stopRequested.set(true);
             try {
                 timerThread.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            
+
             int elapsedSeconds = (int) ((endTime - startTime) / 1000);
             int score = 0;
             int diff = Math.abs(userGuess - targetNumber);
-            
+
             if (userGuess == targetNumber) {
                 score = (elapsedSeconds <= 15) ? 10 : (elapsedSeconds <= 30) ? 7 : 5;
+                correctAnswers++;
             } else {
                 score = switch (diff) {
                     case 1 -> 3;
@@ -137,13 +137,19 @@ public class RandomNumberGame {
                     default -> 0;
                 };
             }
+
+            // Ekstra 5 puan: 2 doğru tahminden sonra
+            if (correctAnswers > 0 && correctAnswers % 2 == 0) {
+                System.out.println("Tebrikler! Üst üste 2 doğru tahmin yaptınız, +5 bonus puan!");
+                score += 5;
+            }
+
             totalScore += score;
-            
+
             System.out.println("Tahmininiz: " + userGuess + " | Hedef: " + targetNumber);
             System.out.println("Puanınız: " + score);
-            System.out.println("Toplam Puanınız: " + totalScore);
             System.out.println("Tahmininiz hedef sayıya " + diff + " kadar uzaklıkta.");
-            
+
             if (diff <= 3) {
                 System.out.print("Oyunu tekrar oynamak ister misiniz? (Evet için 'E' / Hayır için 'H'): ");
                 char response = scanner.next().charAt(0);
@@ -152,9 +158,9 @@ public class RandomNumberGame {
                 playAgain = false;
             }
         } while (playAgain);
-        
-        System.out.println("Oyun sona erdi. Toplam puanınız: " + totalScore);
-        System.out.println("Program kapanıyor...");
+
+        System.out.println("Toplam puanınız: " + totalScore);
+        System.out.println("Oyun sona erdi. Program kapanıyor...");
         System.exit(0);
     }
 }
