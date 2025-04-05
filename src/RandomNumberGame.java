@@ -81,6 +81,7 @@ public class RandomNumberGame {
         boolean playAgain;
         int totalScore = 0;
         int correctAnswers = 0;
+        int consecutiveCorrect = 0;
 
         do {
             System.out.println("Zorluk seviyesini seçin: 1 - Kolay (90 sn), 2 - Orta (60 sn), 3 - Zor (30 sn)");
@@ -129,19 +130,20 @@ public class RandomNumberGame {
             if (userGuess == targetNumber) {
                 score = (elapsedSeconds <= 15) ? 10 : (elapsedSeconds <= 30) ? 7 : 5;
                 correctAnswers++;
+                consecutiveCorrect++;
+                if (consecutiveCorrect == 2) {
+                    System.out.println("Tebrikler! Üst üste 2 doğru tahmin yaptınız, +5 bonus puan!");
+                    score += 5;
+                    consecutiveCorrect = 0;
+                }
             } else {
+                consecutiveCorrect = 0;
                 score = switch (diff) {
                     case 1 -> 3;
                     case 2 -> 2;
                     case 3 -> 1;
                     default -> 0;
                 };
-            }
-
-            // Ekstra 5 puan: 2 doğru tahminden sonra
-            if (correctAnswers > 0 && correctAnswers % 2 == 0) {
-                System.out.println("Tebrikler! Üst üste 2 doğru tahmin yaptınız, +5 bonus puan!");
-                score += 5;
             }
 
             totalScore += score;
