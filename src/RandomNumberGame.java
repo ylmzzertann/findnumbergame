@@ -1,5 +1,4 @@
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 class NumberGenerator {
@@ -40,7 +39,8 @@ class Timer {
                 e.printStackTrace();
             }
         }
-        System.out.println("\nSüre doldu!");
+        System.out.println("\nSüre doldu!\n0 puan kazandınız. Oyun sona erdi.");
+        System.exit(0);
     }
 }
 
@@ -53,7 +53,7 @@ class UserInputHandler {
                 int input = scanner.nextInt();
                 if (input == 0) {
                     stopRequested.set(true);
-                    continue;
+                    return -1;
                 }
                 if (input < 100) {
                     System.out.println("Lütfen en az 3 basamaklı bir sayı girin!");
@@ -81,7 +81,6 @@ public class RandomNumberGame {
         boolean playAgain;
         int totalScore = 0;
         int correctAnswers = 0;
-        int consecutiveCorrect = 0;
         boolean bonusAwarded = false;
 
         do {
@@ -126,40 +125,114 @@ public class RandomNumberGame {
 
             int elapsedSeconds = (int) ((endTime - startTime) / 1000);
             int score = 0;
-            int diff = Math.abs(userGuess - targetNumber);
 
-            if (userGuess == targetNumber) {
-                score = (elapsedSeconds <= 15) ? 10 : (elapsedSeconds <= 30) ? 7 : 5;
-                correctAnswers++;
-                consecutiveCorrect++;
+            if (userGuess == -1) {
+                List<Integer> availableNumbers = new ArrayList<>();
+                for (int n : numbers) availableNumbers.add(n);
+                List<Integer> results = new ArrayList<>(availableNumbers);
 
-                if (consecutiveCorrect == 2) {
-                    System.out.println("Tebrikler! Üst üste 2 doğru tahmin yaptınız, +5 bonus puan!");
-                    score += 5;
-                    bonusAwarded = true;
+                System.out.println("Matematik işlem moduna geçildi.");
+                System.out.println("Kullanabileceğiniz sayılar: " + results);
+
+                int startCloseValue = 0;
+                for (int r : results) {
+                    int diff = Math.abs(r - targetNumber);
+                    if (diff <= 3 && diff > 0) {
+                        startCloseValue = r;
+                        break;
+                    }
+                }
+
+                if (startCloseValue != 0) {
+                    System.out.println("Başlangıçta hedef sayıya yakın bir sayı bulundu: " + startCloseValue);
+                    System.out.println("İşlem yaparak hedefe ulaşmayı deneyin!");
+                }
+
+                while (results.size() >= 2) {
+                    System.out.println("Kullanılabilir sayılar: " + results);
+                    System.out.print("İlk sayıyı seçin: ");
+                    int a = scanner.nextInt();
+                    if (!results.contains(a)) {
+                        System.out.println("Bu sayı kullanılamaz!");
+                        continue;
+                    }
+                    results.remove((Integer) a);
+
+                    System.out.print("İkinci sayıyı seçin: ");
+                    int b = scanner.nextInt();
+                    if (!results.contains(b)) {
+                        results.add(a);
+                        System.out.println("Bu sayı kullanılamaz!");
+                        continue;
+                    }
+                    results.remove((Integer) b);
+
+                    System.out.print("İşlem girin (+, -, *, /): ");
+                    String op = scanner.next();
+                    int res = 0;
+                    switch (op) {
+                        case "+" -> res = a + b;
+                        case "-" -> res = a - b;
+                        case "*" -> res = a * b;
+                        case "/" -> {
+                            if (b == 0 || a % b != 0) {
+                                System.out.println("Geçersiz bölme işlemi!");
+                                results.add(a);
+                                results.add(b);
+                                continue;
+                            }
+                            res = a / b;
+                        }
+                        default -> {
+                            System.out.println("Geçersiz işlem!");
+                            results.add(a);
+                            results.add(b);
+                            continue;
+                        }
+                    }
+                    System.out.println(a + " " + op + " " + b + " = " + res);
+                    results.add(res);
+
+                    int diff = Math.abs(res - targetNumber);
+                    if (res == targetNumber) {
+                        score = 10;
+                        correctAnswers++;
+                        break;
+                    } else if (diff == 1) score = Math.max(score, 3);
+                    else if (diff == 2) score = Math.max(score, 2);
+                    else if (diff == 3) score = Math.max(score, 1);
                 }
             } else {
-                if (bonusAwarded) {
-                    System.out.println("Bir önceki bonus puanınız iptal edildi çünkü bu turda yanlış cevap verdiniz.");
-                    totalScore -= 5;
-                    bonusAwarded = false;
+                int diff = Math.abs(userGuess - targetNumber);
+                if (userGuess == targetNumber) {
+                    score = (elapsedSeconds <= 15) ? 10 : (elapsedSeconds <= 30) ? 7 : 5;
+                    correctAnswers++;
+                } else {
+                    score = switch (diff) {
+                        case 1 -> 3;
+                        case 2 -> 2;
+                        case 3 -> 1;
+                        default -> 0;
+                    };
                 }
-                consecutiveCorrect = 0;
-                score = switch (diff) {
-                    case 1 -> 3;
-                    case 2 -> 2;
-                    case 3 -> 1;
-                    default -> 0;
-                };
+            }
+
+            if (correctAnswers % 2 == 0 && correctAnswers > 0 && !bonusAwarded) {
+                System.out.println("Tebrikler! Üst üste 2 doğru tahmin yaptınız, +5 bonus puan!");
+                score += 5;
+                bonusAwarded = true;
+            } else if (bonusAwarded && score == 0) {
+                System.out.println("Bonus puanınız iptal edildi (yanlış cevap). -5 puan düşüldü.");
+                totalScore -= 5;
+                bonusAwarded = false;
             }
 
             totalScore += score;
 
-            System.out.println("Tahmininiz: " + userGuess + " | Hedef: " + targetNumber);
             System.out.println("Puanınız: " + score);
-            System.out.println("Tahmininiz hedef sayıya " + diff + " kadar uzaklıkta.");
+            System.out.println("Toplam puanınız: " + totalScore);
 
-            if (diff <= 3) {
+            if (score > 0) {
                 System.out.print("Oyunu tekrar oynamak ister misiniz? (Evet için 'E' / Hayır için 'H'): ");
                 char response = scanner.next().charAt(0);
                 playAgain = (response == 'E' || response == 'e');
